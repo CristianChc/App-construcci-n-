@@ -19,6 +19,8 @@ export const metadata: Metadata = {
   },
 };
 
+export const dynamic = "force-dynamic";
+
 async function getFaqs() {
   try {
     const faqs = await prisma.faq.findMany({

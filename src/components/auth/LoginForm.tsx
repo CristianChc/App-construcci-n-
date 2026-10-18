@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signIn, getSession } from "next-auth/react";
+import { signIn } from "next-auth/react";
 
 const INPUT_CLASS =
   "mt-1 block w-full rounded border border-border bg-surface px-3 py-2 text-sm text-ink outline-none focus:border-accent";
@@ -31,17 +31,8 @@ export function LoginForm({ callbackUrl }: { callbackUrl: string }) {
       return;
     }
 
-    const session = await getSession();
-    const role = session?.user?.role;
     setLoading(false);
-
-    if (role === "admin") {
-      router.push(callbackUrl.startsWith("/admin") ? callbackUrl : "/admin");
-    } else if (role === "cliente") {
-      router.push(callbackUrl.startsWith("/cliente") ? callbackUrl : "/cliente");
-    } else {
-      router.push("/");
-    }
+    router.push(callbackUrl || "/");
     router.refresh();
   }
 
