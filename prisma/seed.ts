@@ -1,0 +1,1041 @@
+import { PrismaClient, Rol, TipoObra, TipoConstruccion, RangoM2, PlazoInicio, FaseFoto, EstadoObra, EstadoPago, CargoEmpleado, EstadoHerramienta } from "@prisma/client";
+import bcrypt from "bcryptjs";
+
+const prisma = new PrismaClient();
+
+async function main() {
+  console.log("🌱 Limpiando datos existentes...");
+  await prisma.prestamoHerramienta.deleteMany();
+  await prisma.materialObra.deleteMany();
+  await prisma.herramienta.deleteMany();
+  await prisma.material.deleteMany();
+  await prisma.asignacionObra.deleteMany();
+  await prisma.empleado.deleteMany();
+  await prisma.pagoObra.deleteMany();
+  await prisma.hitosObra.deleteMany();
+  await prisma.obraActiva.deleteMany();
+  await prisma.fotoProyecto.deleteMany();
+  await prisma.testimonio.deleteMany();
+  await prisma.contrato.deleteMany();
+  await prisma.cotizacion.deleteMany();
+  await prisma.proyecto.deleteMany();
+  await prisma.usuario.deleteMany();
+  await prisma.cliente.deleteMany();
+  await prisma.servicio.deleteMany();
+  await prisma.faq.deleteMany();
+  await prisma.certificacion.deleteMany();
+  await prisma.precioReferencia.deleteMany();
+
+  console.log("👤 Creando usuario admin...");
+  const passwordHash = await bcrypt.hash("admin123", 10);
+  const admin = await prisma.usuario.create({
+    data: {
+      nombre: "Admin",
+      apellidos: "Demo",
+      email: "admin@demo.com",
+      passwordHash,
+      rol: Rol.admin,
+    },
+  });
+  console.log(`   ✅ Admin creado: ${admin.email}`);
+
+  console.log("👥 Creando clientes de ejemplo...");
+  const clientes = await Promise.all([
+    prisma.cliente.create({
+      data: {
+        nombre: "Carlos",
+        apellidos: "Méndez",
+        telefono: "+591 7 123-4567",
+        email: "carlos.mendez@email.com",
+        ciudad: "La Paz",
+      },
+    }),
+    prisma.cliente.create({
+      data: {
+        nombre: "Laura",
+        apellidos: "Fernández",
+        telefono: "+591 7 123-4568",
+        email: "laura.f@email.com",
+        ciudad: "Santa Cruz",
+      },
+    }),
+    prisma.cliente.create({
+      data: {
+        nombre: "Roberto",
+        apellidos: "García",
+        telefono: "+591 7 123-4569",
+        ciudad: "Cochabamba",
+      },
+    }),
+    prisma.cliente.create({
+      data: {
+        nombre: "María",
+        apellidos: "López",
+        telefono: "+591 7 123-4570",
+        email: "maria.lopez@email.com",
+        ciudad: "El Alto",
+      },
+    }),
+    prisma.cliente.create({
+      data: {
+        nombre: "Juan",
+        apellidos: "Pérez",
+        telefono: "+591 7 123-4571",
+        ciudad: "Sucre",
+      },
+    }),
+    prisma.cliente.create({
+      data: {
+        nombre: "Ana",
+        apellidos: "Rodríguez",
+        telefono: "+591 7 123-4572",
+        email: "ana.r@email.com",
+        ciudad: "Tarija",
+      },
+    }),
+    prisma.cliente.create({
+      data: {
+        nombre: "Diego",
+        apellidos: "Torres",
+        telefono: "+591 7 123-4573",
+        ciudad: "Oruro",
+      },
+    }),
+    prisma.cliente.create({
+      data: {
+        nombre: "Sofía",
+        apellidos: "Martínez",
+        telefono: "+591 7 123-4574",
+        email: "sofia.m@email.com",
+        ciudad: "Potosí",
+      },
+    }),
+  ]);
+  console.log(`   ✅ ${clientes.length} clientes creados`);
+
+  console.log("📋 Creando cotizaciones...");
+  const cotizaciones = await Promise.all([
+    prisma.cotizacion.create({
+      data: {
+        clienteId: clientes[0].id,
+        tipoObra: TipoObra.vivienda_nueva,
+        tipoConstruccion: TipoConstruccion.seco,
+        rangoM2: RangoM2.m100_200,
+        ubicacionObra: "Zona Sur, La Paz",
+        plazoInicio: PlazoInicio.lo_antes_posible,
+        origen: "web",
+        estado: "nuevo",
+        requerimiento:
+          "Queremos construir una casa de 3 dormitorios en la Zona Sur. Buscamos algo moderno, bien aislado y con plazo firme.",
+      },
+    }),
+    prisma.cotizacion.create({
+      data: {
+        clienteId: clientes[1].id,
+        tipoObra: TipoObra.ampliacion,
+        tipoConstruccion: TipoConstruccion.seco,
+        rangoM2: RangoM2.m50_100,
+        ubicacionObra: "Equipetrol, Santa Cruz",
+        plazoInicio: PlazoInicio.en_3_meses,
+        origen: "whatsapp",
+        estado: "contactado",
+      },
+    }),
+    prisma.cotizacion.create({
+      data: {
+        clienteId: clientes[2].id,
+        tipoObra: TipoObra.vivienda_nueva,
+        tipoConstruccion: TipoConstruccion.tradicional,
+        rangoM2: RangoM2.m100_200,
+        ubicacionObra: "Cala Cala, Cochabamba",
+        plazoInicio: PlazoInicio.lo_antes_posible,
+        origen: "facebook",
+        estado: "visita_tecnica",
+      },
+    }),
+    prisma.cotizacion.create({
+      data: {
+        clienteId: clientes[3].id,
+        tipoObra: TipoObra.otro,
+        tipoConstruccion: TipoConstruccion.seco,
+        rangoM2: RangoM2.hasta_50,
+        ubicacionObra: "El Alto, La Paz",
+        plazoInicio: PlazoInicio.no_sabe,
+        origen: "estimador",
+        estado: "presupuestado",
+        montoEstimado: 4500000,
+      },
+    }),
+    prisma.cotizacion.create({
+      data: {
+        clienteId: clientes[4].id,
+        tipoObra: TipoObra.vivienda_nueva,
+        tipoConstruccion: TipoConstruccion.seco,
+        rangoM2: RangoM2.mas_200,
+        ubicacionObra: "Sucre",
+        plazoInicio: PlazoInicio.en_3_meses,
+        origen: "referido",
+        estado: "ganado",
+        montoEstimado: 18000000,
+        montoCerrado: 17500000,
+        requerimiento:
+          "Casa principal de 200m2 más quincho. Necesitamos plazos ciertos porque tenemos un bebé en camino.",
+      },
+    }),
+    prisma.cotizacion.create({
+      data: {
+        clienteId: clientes[5].id,
+        tipoObra: TipoObra.ampliacion,
+        tipoConstruccion: TipoConstruccion.no_sabe,
+        rangoM2: RangoM2.m50_100,
+        ubicacionObra: "Tarija",
+        plazoInicio: PlazoInicio.no_sabe,
+        origen: "tiktok",
+        estado: "perdido",
+      },
+    }),
+    prisma.cotizacion.create({
+      data: {
+        clienteId: clientes[6].id,
+        tipoObra: TipoObra.vivienda_nueva,
+        tipoConstruccion: TipoConstruccion.seco,
+        rangoM2: RangoM2.m100_200,
+        ubicacionObra: "Oruro",
+        plazoInicio: PlazoInicio.lo_antes_posible,
+        origen: "web",
+        estado: "nuevo",
+      },
+    }),
+    prisma.cotizacion.create({
+      data: {
+        clienteId: clientes[7].id,
+        tipoObra: TipoObra.vivienda_nueva,
+        tipoConstruccion: TipoConstruccion.seco,
+        rangoM2: RangoM2.m50_100,
+        ubicacionObra: "Potosí",
+        plazoInicio: PlazoInicio.en_3_meses,
+        origen: "whatsapp",
+        estado: "contactado",
+      },
+    }),
+  ]);
+  console.log(`   ✅ ${cotizaciones.length} cotizaciones creadas`);
+
+  console.log("📁 Creando proyectos de portafolio...");
+  const proyectos = await Promise.all([
+    prisma.proyecto.create({
+      data: {
+        clienteId: clientes[4].id,
+        slug: "casa-steel-frame-santa-cruz",
+        titulo: "Casa Steel Frame en Santa Cruz",
+        tipoConstruccion: TipoConstruccion.seco,
+        m2Construidos: 220,
+        diasEjecucion: 45,
+        ubicacion: "Santa Cruz de la Sierra, Bolivia",
+        problemaCliente:
+          "La familia quería una casa moderna y sustentable, pero con presupuesto limitado y plazo ajustado para mudarse.",
+        solucion:
+          "Construcción en steel frame con aislación térmica de alta eficiencia. Reducción del 40% en tiempo de obra respecto a tradicional, con mejor aislación.",
+        destacado: true,
+        publicado: true,
+      },
+    }),
+    prisma.proyecto.create({
+      data: {
+        slug: "ampliacion-zona-sur-la-paz",
+        titulo: "Ampliación en La Paz",
+        tipoConstruccion: TipoConstruccion.seco,
+        m2Construidos: 65,
+        diasEjecucion: 20,
+        ubicacion: "Zona Sur, La Paz, Bolivia",
+        problemaCliente:
+          "Necesitaban un estudio y un dormitorio extra en el piso superior, sin perder el jardín.",
+        solucion:
+          "Ampliación en steel frame sobre estructura existente. Se logró el doble de espacio sin demoler, con acabados idénticos a la casa original.",
+        destacado: true,
+        publicado: true,
+      },
+    }),
+    prisma.proyecto.create({
+      data: {
+        slug: "local-comercial-santa-cruz",
+        titulo: "Local Comercial en Santa Cruz",
+        tipoConstruccion: TipoConstruccion.seco,
+        m2Construidos: 90,
+        diasEjecucion: 15,
+        ubicacion: "Equipetrol, Santa Cruz, Bolivia",
+        problemaCliente:
+          "Un emprendedor quería habilitar un local gastronómico en un sótano, con plazo mínimo de demora.",
+        solucion:
+          "Acondicionamiento completo con tabiquería drywall, cielorrasos suspendidos y revestimientos resistentes a humedad. Listo en 15 días.",
+        publicado: true,
+      },
+    }),
+    prisma.proyecto.create({
+      data: {
+        slug: "quinta-rehabilitacion",
+        titulo: "Quinta en Rehabilitación",
+        tipoConstruccion: TipoConstruccion.integral,
+        m2Construidos: 350,
+        diasEjecucion: 80,
+        ubicacion: "Tarija, Bolivia",
+        problemaCliente:
+          "Una quinta familiar con décadas de abandono que querían convertir en casa de fin de semana.",
+        solucion:
+          "Rehabilitación integral: estructura reforzada, nuevos tabiques, aislación, instalaciones. Se preservó la fachada original.",
+        destacado: true,
+        publicado: true,
+      },
+    }),
+    prisma.proyecto.create({
+      data: {
+        slug: "oficinas-empresariales",
+        titulo: "Oficinas Empresariales",
+        tipoConstruccion: TipoConstruccion.seco,
+        m2Construidos: 180,
+        diasEjecucion: 30,
+        ubicacion: "La Paz, Bolivia",
+        problemaCliente:
+          "Una startup necesitaba oficinas modulares que pudieran reconfigurar según crezca el equipo.",
+        solucion:
+          "Sistema de tabiques desmontables en drywall con puertas corredizas. El espacio se adapta al equipo sin obras.",
+        publicado: true,
+      },
+    }),
+    prisma.proyecto.create({
+      data: {
+        slug: "casa-ecologica-cochabamba",
+        titulo: "Casa Ecológica en Cochabamba",
+        tipoConstruccion: TipoConstruccion.seco,
+        m2Construidos: 160,
+        diasEjecucion: 35,
+        ubicacion: "Cochabamba, Bolivia",
+        problemaCliente:
+          "Un arquitecto quería demostrar que la construcción en seco puede ser tan estética como la tradicional.",
+        solucion:
+          "Casa de diseño con tabiques vistos, cielorrasos de chapa ondulada y amplios vanos de vidrio. Publicada en revista de arquitectura.",
+        publicado: true,
+      },
+    }),
+  ]);
+  console.log(`   ✅ ${proyectos.length} proyectos creados`);
+
+  console.log("📸 Creando fotos de proyectos...");
+  const fotos = await Promise.all([
+    // Casa Santa Cruz
+    prisma.fotoProyecto.create({
+      data: { proyectoId: proyectos[0].id, url: "/img/proyectos/pilar-antes.jpg", fase: FaseFoto.antes, orden: 1 },
+    }),
+    prisma.fotoProyecto.create({
+      data: { proyectoId: proyectos[0].id, url: "/img/proyectos/pilar-durante.jpg", fase: FaseFoto.durante, orden: 2 },
+    }),
+    prisma.fotoProyecto.create({
+      data: { proyectoId: proyectos[0].id, url: "/img/proyectos/pilar-despues.jpg", fase: FaseFoto.despues, orden: 3 },
+    }),
+    // Ampliación La Paz
+    prisma.fotoProyecto.create({
+      data: { proyectoId: proyectos[1].id, url: "/img/proyectos/vlopez-antes.jpg", fase: FaseFoto.antes, orden: 1 },
+    }),
+    prisma.fotoProyecto.create({
+      data: { proyectoId: proyectos[1].id, url: "/img/proyectos/vlopez-despues.jpg", fase: FaseFoto.despues, orden: 2 },
+    }),
+    // Local Santa Cruz
+    prisma.fotoProyecto.create({
+      data: { proyectoId: proyectos[2].id, url: "/img/proyectos/santelmo-durante.jpg", fase: FaseFoto.durante, orden: 1 },
+    }),
+    prisma.fotoProyecto.create({
+      data: { proyectoId: proyectos[2].id, url: "/img/proyectos/santelmo-despues.jpg", fase: FaseFoto.despues, orden: 2 },
+    }),
+    // Quinta Tarija
+    prisma.fotoProyecto.create({
+      data: { proyectoId: proyectos[3].id, url: "/img/proyectos/sanpedro-antes.jpg", fase: FaseFoto.antes, orden: 1 },
+    }),
+    prisma.fotoProyecto.create({
+      data: { proyectoId: proyectos[3].id, url: "/img/proyectos/sanpedro-durante.jpg", fase: FaseFoto.durante, orden: 2 },
+    }),
+    prisma.fotoProyecto.create({
+      data: { proyectoId: proyectos[3].id, url: "/img/proyectos/sanpedro-despues.jpg", fase: FaseFoto.despues, orden: 3 },
+    }),
+    // Oficinas La Paz
+    prisma.fotoProyecto.create({
+      data: { proyectoId: proyectos[4].id, url: "/img/proyectos/oficinas-durante.jpg", fase: FaseFoto.durante, orden: 1 },
+    }),
+    prisma.fotoProyecto.create({
+      data: { proyectoId: proyectos[4].id, url: "/img/proyectos/oficinas-despues.jpg", fase: FaseFoto.despues, orden: 2 },
+    }),
+  ]);
+  console.log(`   ✅ ${fotos.length} fotos creadas`);
+
+  console.log("💬 Creando testimonios...");
+  const testimonios = await Promise.all([
+    prisma.testimonio.create({
+      data: {
+        proyectoId: proyectos[0].id,
+        clienteNombre: "Juan Pérez",
+        texto:
+          "Increíble cómo en 45 días pasamos de terreno a casa habitable. La calidad de los acabados superó nuestras expectativas. El aislamiento térmico es notable.",
+        puntaje: 5,
+        autorizaPublicar: true,
+        publicado: true,
+      },
+    }),
+    prisma.testimonio.create({
+      data: {
+        proyectoId: proyectos[1].id,
+        clienteNombre: "Laura Fernández",
+        texto:
+          "Necesitábamos ampliar sin demoler y cumplieron exactamente lo prometido. La ampliación se ve como si siempre hubiera estado ahí.",
+        puntaje: 5,
+        autorizaPublicar: true,
+        publicado: true,
+      },
+    }),
+    prisma.testimonio.create({
+      data: {
+        proyectoId: proyectos[2].id,
+        clienteNombre: "Diego Torres",
+        texto:
+          "El local quedó listo en 15 días, justo antes de la inauguración. Profesionales de primera.",
+        puntaje: 5,
+        autorizaPublicar: true,
+        publicado: true,
+      },
+    }),
+    prisma.testimonio.create({
+      data: {
+        proyectoId: proyectos[3].id,
+        clienteNombre: "Roberto García",
+        texto:
+          "Transformaron una quinta abandonada en una casa hermosa. Preservaron la fachada y modernizaron todo por dentro. Excelente trabajo.",
+        puntaje: 4,
+        autorizaPublicar: true,
+        publicado: true,
+      },
+    }),
+    prisma.testimonio.create({
+      data: {
+        clienteNombre: "María López",
+        texto:
+          "Contraté solo la cotización pero me sorprendió la profesionalidad y claridad del presupuesto. Muy recomendable.",
+        puntaje: 5,
+        autorizaPublicar: true,
+        publicado: true,
+      },
+    }),
+  ]);
+  console.log(`   ✅ ${testimonios.length} testimonios creados`);
+
+  console.log("🛠️ Creando servicios...");
+  const servicios = await Promise.all([
+    prisma.servicio.create({
+      data: {
+        slug: "steel-frame",
+        titulo: "Steel Frame",
+        descripcion:
+          "Construcción de viviendas y estructuras con perfilería de acero galvanizado. Más liviano, más rápido, más eficiente térmicamente.",
+        orden: 1,
+      },
+    }),
+    prisma.servicio.create({
+      data: {
+        slug: "drywall",
+        titulo: "Tabiquería Drywall",
+        descripcion:
+          "Tabiques internos en placa de yeso sobre estructura de acero. Rápido, limpio y con excelente aislación acústica y térmica.",
+        orden: 2,
+      },
+    }),
+    prisma.servicio.create({
+      data: {
+        slug: "cielorrasos",
+        titulo: "Cielorrasos",
+        descripcion:
+          "Cielorrasos suspendidos en placa de yeso, con opciones de diseños, iluminación empotrada y acabados lisos o texturizados.",
+        orden: 3,
+      },
+    }),
+    prisma.servicio.create({
+      data: {
+        slug: "revestimientos",
+        titulo: "Revestimientos",
+        descripcion:
+          "Revestimientos interiores y exteriores en placas de yeso, fibrocemento u otros materiales. Acabados profesionales garantizados.",
+        orden: 4,
+      },
+    }),
+    prisma.servicio.create({
+      data: {
+        slug: "aislaciones",
+        titulo: "Aislaciones Térmicas y Acústicas",
+        descripcion:
+          "Instalación de lana de vidrio, lana de roca y otros materiales aislantes para máxima eficiencia energética y confort.",
+        orden: 5,
+      },
+    }),
+    prisma.servicio.create({
+      data: {
+        slug: "habilitaciones",
+        titulo: "Habilitaciones de Locales",
+        descripcion:
+          "Trámites y ejecución para habilitación de locales comerciales, oficinas y espacios gastronómicos. Cumplimiento de normativas.",
+        orden: 6,
+      },
+    }),
+  ]);
+  console.log(`   ✅ ${servicios.length} servicios creados`);
+
+  console.log("❓ Creando FAQs...");
+  const faqs = await Promise.all([
+    prisma.faq.create({
+      data: {
+        pregunta: "¿Cuánto tarda una vivienda en construcción en seco?",
+        respuesta:
+          "70 días para una vivienda pequeña (hasta 100 m²), desde el inicio de la obra hasta la entrega de llaves. Es significativamente más rápido que la construcción tradicional.",
+        orden: 1,
+      },
+    }),
+    prisma.faq.create({
+      data: {
+        pregunta: "¿El steel frame es más caro que la construcción tradicional?",
+        respuesta:
+          "El costo por m² es comparable, pero el ahorro viene por el tiempo de obra (menos intereses si financia) y la eficiencia térmica (menor costo de calefacción y refrigeración).",
+        orden: 2,
+      },
+    }),
+    prisma.faq.create({
+      data: {
+        pregunta: "¿Cómo se calcula el costo de una obra?",
+        respuesta:
+          "Cobramos por m². El costo varía según el tipo de construcción (tradicional, seco, integral), la ubicación, los acabados y la complejidad. Le damos un presupuesto detallado sin compromiso.",
+        orden: 3,
+      },
+    }),
+    prisma.faq.create({
+      data: {
+        pregunta: "¿Realizan ampliaciones sobre estructuras existentes?",
+        respuesta:
+          "Sí, tanto en construcción en seco (ideal por su ligereza) como en tradicional. Evaluamos la estructura existente y diseñamos la solución adecuada.",
+        orden: 4,
+      },
+    }),
+    prisma.faq.create({
+      data: {
+        pregunta: "¿Qué tipo de aislación térmica ofrecen?",
+        respuesta:
+          "En construcción en seco: lana de vidrio o roca entre parantes (coeficiente térmico superior). En tradicional: aislación en techos y muros según la normativa vigente.",
+        orden: 5,
+      },
+    }),
+    prisma.faq.create({
+      data: {
+        pregunta: "¿Trabajan en todo Bolivia?",
+        respuesta:
+          "Sí, tenemos cobertura nacional en Bolivia.",
+        orden: 6,
+      },
+    }),
+    prisma.faq.create({
+      data: {
+        pregunta: "¿Puedo ver ejemplos de trabajos anteriores?",
+        respuesta:
+          "Sí, en nuestra sección de proyectos encontrará casos reales con fotos de antes, durante y después, metros cuadrados y tiempos de ejecución.",
+        orden: 7,
+      },
+    }),
+    prisma.faq.create({
+      data: {
+        pregunta: "¿Cómo pido un presupuesto?",
+        respuesta:
+          "Puede usar nuestro estimador online para tener una referencia, o completar el formulario de cotización con los detalles de su obra. Nos comunicamos con usted en 24 horas.",
+        orden: 8,
+      },
+    }),
+    prisma.faq.create({
+      data: {
+        pregunta: "¿Qué incluye el presupuesto?",
+        respuesta:
+          "El presupuesto incluye estructura, tabiquería, cielorraso, revestimientos, aislación e instalaciones básicas. No incluye sanitarios, grifería ni pisos (a menos que se especifique).",
+        orden: 9,
+      },
+    }),
+    prisma.faq.create({
+      data: {
+        pregunta: "¿Ofrecen garantía en sus obras?",
+        respuesta:
+          "Sí, todas nuestras obras tienen garantía de 1 año por vicios de construcción y materiales. Respaldamos nuestro trabajo con certificaciones y seguros vigentes.",
+        orden: 10,
+      },
+    }),
+  ]);
+  console.log(`   ✅ ${faqs.length} FAQs creadas`);
+
+  console.log("📜 Creando certificaciones...");
+  const certificaciones = await Promise.all([
+    prisma.certificacion.create({
+      data: {
+        titulo: "Matrícula Constructora Nacional",
+        descripcion: "Matrícula habilitante para construcciones en todo el territorio boliviano.",
+      },
+    }),
+    prisma.certificacion.create({
+      data: {
+        titulo: "Certificación Steel Frame",
+        descripcion: "Certificación oficial en sistemas de construcción en seco con perfilería de acero galvanizado.",
+      },
+    }),
+    prisma.certificacion.create({
+      data: {
+        titulo: "Garantía de 1 año",
+        descripcion: "Garantía escrita de 1 año en todas nuestras obras por vicios de construcción y materiales.",
+      },
+    }),
+    prisma.certificacion.create({
+      data: {
+        titulo: "Equipo profesional y especializado",
+        descripcion: "Más de 14 años de experiencia y 200+ obras ejecutadas a nivel nacional en Bolivia.",
+      },
+    }),
+  ]);
+  console.log(`   ✅ ${certificaciones.length} certificaciones creadas`);
+
+  console.log("💰 Creando precios de referencia...");
+  const precios = await Promise.all([
+    // Steel frame
+    prisma.precioReferencia.create({
+      data: { tipoConstruccion: TipoConstruccion.seco, rangoM2: RangoM2.hasta_50, precioMin: 350000, precioMax: 500000 },
+    }),
+    prisma.precioReferencia.create({
+      data: { tipoConstruccion: TipoConstruccion.seco, rangoM2: RangoM2.m50_100, precioMin: 300000, precioMax: 420000 },
+    }),
+    prisma.precioReferencia.create({
+      data: { tipoConstruccion: TipoConstruccion.seco, rangoM2: RangoM2.m100_200, precioMin: 280000, precioMax: 380000 },
+    }),
+    prisma.precioReferencia.create({
+      data: { tipoConstruccion: TipoConstruccion.seco, rangoM2: RangoM2.mas_200, precioMin: 250000, precioMax: 350000 },
+    }),
+    // Tradicional
+    prisma.precioReferencia.create({
+      data: { tipoConstruccion: TipoConstruccion.tradicional, rangoM2: RangoM2.hasta_50, precioMin: 400000, precioMax: 550000 },
+    }),
+    prisma.precioReferencia.create({
+      data: { tipoConstruccion: TipoConstruccion.tradicional, rangoM2: RangoM2.m50_100, precioMin: 350000, precioMax: 480000 },
+    }),
+    prisma.precioReferencia.create({
+      data: { tipoConstruccion: TipoConstruccion.tradicional, rangoM2: RangoM2.m100_200, precioMin: 320000, precioMax: 440000 },
+    }),
+    prisma.precioReferencia.create({
+      data: { tipoConstruccion: TipoConstruccion.tradicional, rangoM2: RangoM2.mas_200, precioMin: 300000, precioMax: 400000 },
+    }),
+  ]);
+  console.log(`   ✅ ${precios.length} precios de referencia creados`);
+
+  console.log("🏗️  Creando usuario cliente + obra activa...");
+  const clientePasswordHash = await bcrypt.hash("cliente123", 10);
+  const usuarioCliente = await prisma.usuario.create({
+    data: {
+      nombre: clientes[4].nombre,
+      apellidos: clientes[4].apellidos,
+      email: "cliente@demo.com",
+      passwordHash: clientePasswordHash,
+      rol: Rol.cliente,
+      clienteId: clientes[4].id,
+    },
+  });
+  console.log(`   ✅ Usuario cliente creado: ${usuarioCliente.email}`);
+
+  const contrato = await prisma.contrato.create({
+    data: {
+      clienteId: clientes[4].id,
+      cotizacionId: cotizaciones[4].id,
+      montoTotal: 17500000,
+      fechaFirma: new Date("2026-06-20"),
+      observaciones:
+        "Contrato llave en mano. Incluye estructura steel frame, cerramientos, instalaciones y terminaciones.",
+    },
+  });
+
+  const obra = await prisma.obraActiva.create({
+    data: {
+      clienteId: clientes[4].id,
+      contratoId: contrato.id,
+      direccionObra: "Av. Los Álamos 1450, Santa Cruz",
+      fechaInicio: new Date("2026-07-01"),
+      fechaFinEstimada: new Date("2026-11-30"),
+      estado: EstadoObra.en_curso,
+      progreso: 45,
+    },
+  });
+
+  const hitos = await Promise.all([
+    prisma.hitosObra.create({
+      data: {
+        obraId: obra.id,
+        titulo: "Replanteo y fundaciones",
+        descripcion:
+          "Nivelación del terreno, replanteo de ejes y ejecución de platea de fundación.",
+        fecha: new Date("2026-07-08"),
+        visibleCliente: true,
+      },
+    }),
+    prisma.hitosObra.create({
+      data: {
+        obraId: obra.id,
+        titulo: "Estructura steel frame",
+        descripcion:
+          "Montaje de paneles y perfiles galvanizados. Estructura completa y arriostrada.",
+        fecha: new Date("2026-07-28"),
+        visibleCliente: true,
+      },
+    }),
+    prisma.hitosObra.create({
+      data: {
+        obraId: obra.id,
+        titulo: "Cubierta y cerramientos",
+        descripcion:
+          "Colocación de chapa, aislación hidrófuga y cerramientos exteriores.",
+        fecha: new Date("2026-08-20"),
+        visibleCliente: true,
+      },
+    }),
+    prisma.hitosObra.create({
+      data: {
+        obraId: obra.id,
+        titulo: "Instalaciones (en curso)",
+        descripcion:
+          "Tendido de cañerías eléctricas y sanitarias. Previsto para septiembre.",
+        fecha: new Date("2026-09-15"),
+        visibleCliente: false,
+      },
+    }),
+  ]);
+  console.log(`   ✅ ${hitos.length} hitos de obra creados`);
+
+  const pagos = await Promise.all([
+    prisma.pagoObra.create({
+      data: {
+        obraId: obra.id,
+        monto: 5250000,
+        fecha: new Date("2026-06-25"),
+        concepto: "Anticipo 30% a la firma del contrato",
+        estado: EstadoPago.confirmado,
+      },
+    }),
+    prisma.pagoObra.create({
+      data: {
+        obraId: obra.id,
+        monto: 4375000,
+        fecha: new Date("2026-07-30"),
+        concepto: "Certificado de avance: estructura steel frame",
+        estado: EstadoPago.confirmado,
+      },
+    }),
+    prisma.pagoObra.create({
+      data: {
+        obraId: obra.id,
+        monto: 3500000,
+        fecha: new Date("2026-09-05"),
+        concepto: "Certificado de avance: cubierta y cerramientos",
+        estado: EstadoPago.registrado,
+      },
+    }),
+  ]);
+  console.log(`   ✅ ${pagos.length} pagos de obra creados`);
+
+  console.log("👷 Creando empleados...");
+  const empleados = await Promise.all([
+    prisma.empleado.create({
+      data: {
+        nombre: "Martín",
+        apellidos: "Silva",
+        ci: "4823156",
+        telefono: "+591 7 666-1111",
+        cargo: CargoEmpleado.ingeniero,
+        fechaIngreso: new Date("2022-03-15"),
+        salario: 1200000,
+        activo: true,
+      },
+    }),
+    prisma.empleado.create({
+      data: {
+        nombre: "Roberto",
+        apellidos: "Gómez",
+        ci: "6739012",
+        telefono: "+591 7 666-2222",
+        cargo: CargoEmpleado.maestro_obra,
+        fechaIngreso: new Date("2021-08-10"),
+        salario: 950000,
+        activo: true,
+      },
+    }),
+    prisma.empleado.create({
+      data: {
+        nombre: "Carlos",
+        apellidos: "Díaz",
+        ci: "5345678",
+        telefono: "+591 7 666-3333",
+        cargo: CargoEmpleado.albanil,
+        fechaIngreso: new Date("2023-01-20"),
+        salario: 750000,
+        activo: true,
+      },
+    }),
+    prisma.empleado.create({
+      data: {
+        nombre: "Lucas",
+        apellidos: "Fernández",
+        ci: "7901234",
+        telefono: "+591 7 666-4444",
+        cargo: CargoEmpleado.electricista,
+        fechaIngreso: new Date("2023-06-05"),
+        salario: 850000,
+        activo: true,
+      },
+    }),
+    prisma.empleado.create({
+      data: {
+        nombre: "Andrea",
+        apellidos: "Paz",
+        ci: "4567890",
+        telefono: "+591 7 666-5555",
+        cargo: CargoEmpleado.administrativo,
+        fechaIngreso: new Date("2020-11-01"),
+        salario: 800000,
+        activo: true,
+      },
+    }),
+  ]);
+  console.log(`   ✅ ${empleados.length} empleados creados`);
+
+  console.log("📋 Creando asignaciones de obra...");
+  const asignaciones = await Promise.all([
+    prisma.asignacionObra.create({
+      data: {
+        empleadoId: empleados[0].id,
+        obraId: obra.id,
+        rolEnObra: "Ingeniero a cargo",
+        fechaInicio: new Date("2026-07-01"),
+      },
+    }),
+    prisma.asignacionObra.create({
+      data: {
+        empleadoId: empleados[1].id,
+        obraId: obra.id,
+        rolEnObra: "Maestro de obra",
+        fechaInicio: new Date("2026-07-01"),
+      },
+    }),
+    prisma.asignacionObra.create({
+      data: {
+        empleadoId: empleados[2].id,
+        obraId: obra.id,
+        rolEnObra: "Albañil principal",
+        fechaInicio: new Date("2026-07-05"),
+      },
+    }),
+    prisma.asignacionObra.create({
+      data: {
+        empleadoId: empleados[3].id,
+        obraId: obra.id,
+        rolEnObra: "Electricista",
+        fechaInicio: new Date("2026-09-01"),
+      },
+    }),
+  ]);
+  console.log(`   ✅ ${asignaciones.length} asignaciones creadas`);
+
+  console.log("📦 Creando materiales...");
+  const materiales = await Promise.all([
+    prisma.material.create({
+      data: {
+        nombre: "Cemento Portland",
+        unidad: "bolsa",
+        stockActual: 150,
+        stockMinimo: 20,
+        precioUnitario: 8500,
+        activo: true,
+      },
+    }),
+    prisma.material.create({
+      data: {
+        nombre: "Arena de río",
+        unidad: "m3",
+        stockActual: 45,
+        stockMinimo: 10,
+        precioUnitario: 25000,
+        activo: true,
+      },
+    }),
+    prisma.material.create({
+      data: {
+        nombre: "Fierro corrugado 12mm",
+        unidad: "barra",
+        stockActual: 200,
+        stockMinimo: 30,
+        precioUnitario: 12000,
+        activo: true,
+      },
+    }),
+    prisma.material.create({
+      data: {
+        nombre: "Lana de vidrio 100mm",
+        unidad: "rollo",
+        stockActual: 80,
+        stockMinimo: 15,
+        precioUnitario: 15000,
+        activo: true,
+      },
+    }),
+    prisma.material.create({
+      data: {
+        nombre: "Placa de yeso 12.5mm",
+        unidad: "unidad",
+        stockActual: 300,
+        stockMinimo: 50,
+        precioUnitario: 4500,
+        activo: true,
+      },
+    }),
+  ]);
+  console.log(`   ✅ ${materiales.length} materiales creados`);
+
+  console.log("🏗️ Creando uso de materiales en obra...");
+  const materialesObra = await Promise.all([
+    prisma.materialObra.create({
+      data: {
+        obraId: obra.id,
+        materialId: materiales[0].id,
+        cantidad: 80,
+        precioUnitario: 8500,
+        fecha: new Date("2026-07-05"),
+      },
+    }),
+    prisma.materialObra.create({
+      data: {
+        obraId: obra.id,
+        materialId: materiales[1].id,
+        cantidad: 12,
+        precioUnitario: 25000,
+        fecha: new Date("2026-07-08"),
+      },
+    }),
+    prisma.materialObra.create({
+      data: {
+        obraId: obra.id,
+        materialId: materiales[2].id,
+        cantidad: 60,
+        precioUnitario: 12000,
+        fecha: new Date("2026-07-10"),
+      },
+    }),
+    prisma.materialObra.create({
+      data: {
+        obraId: obra.id,
+        materialId: materiales[3].id,
+        cantidad: 40,
+        precioUnitario: 15000,
+        fecha: new Date("2026-08-15"),
+      },
+    }),
+    prisma.materialObra.create({
+      data: {
+        obraId: obra.id,
+        materialId: materiales[4].id,
+        cantidad: 120,
+        precioUnitario: 4500,
+        fecha: new Date("2026-08-20"),
+      },
+    }),
+  ]);
+  console.log(`   ✅ ${materialesObra.length} usos de materiales creados`);
+
+  console.log("🔧 Creando herramientas...");
+  const herramientas = await Promise.all([
+    prisma.herramienta.create({
+      data: {
+        nombre: "Taladro percutor Bosch",
+        codigo: "HERR-001",
+        estado: EstadoHerramienta.disponible,
+        activo: true,
+      },
+    }),
+    prisma.herramienta.create({
+      data: {
+        nombre: "Mezcladora de cemento",
+        codigo: "HERR-002",
+        estado: EstadoHerramienta.en_uso,
+        activo: true,
+      },
+    }),
+    prisma.herramienta.create({
+      data: {
+        nombre: "Andamio modular 3m",
+        codigo: "HERR-003",
+        estado: EstadoHerramienta.disponible,
+        activo: true,
+      },
+    }),
+    prisma.herramienta.create({
+      data: {
+        nombre: "Amoladora angular",
+        codigo: "HERR-004",
+        estado: EstadoHerramienta.mantenimiento,
+        activo: true,
+      },
+    }),
+    prisma.herramienta.create({
+      data: {
+        nombre: "Nivel láser",
+        codigo: "HERR-005",
+        estado: EstadoHerramienta.disponible,
+        activo: true,
+      },
+    }),
+  ]);
+  console.log(`   ✅ ${herramientas.length} herramientas creadas`);
+
+  console.log("📝 Creando préstamos de herramientas...");
+  const prestamos = await Promise.all([
+    prisma.prestamoHerramienta.create({
+      data: {
+        herramientaId: herramientas[1].id,
+        empleadoId: empleados[2].id,
+        obraId: obra.id,
+        fechaSalida: new Date("2026-07-10"),
+        observaciones: "Para hormigón de fundaciones",
+      },
+    }),
+    prisma.prestamoHerramienta.create({
+      data: {
+        herramientaId: herramientas[0].id,
+        empleadoId: empleados[3].id,
+        obraId: obra.id,
+        fechaSalida: new Date("2026-09-01"),
+        observaciones: "Instalaciones eléctricas",
+      },
+    }),
+  ]);
+  console.log(`   ✅ ${prestamos.length} préstamos creados`);
+
+  console.log("\n🎉 ¡Seed completado exitosamente!");
+  console.log(`   Usuarios: 2 (admin@demo.com, cliente@demo.com)`);
+  console.log(`   Clientes: ${clientes.length}`);
+  console.log(`   Cotizaciones: ${cotizaciones.length}`);
+  console.log(`   Proyectos: ${proyectos.length}`);
+  console.log(`   Fotos: ${fotos.length}`);
+  console.log(`   Testimonios: ${testimonios.length}`);
+  console.log(`   Servicios: ${servicios.length}`);
+  console.log(`   FAQs: ${faqs.length}`);
+  console.log(`   Certificaciones: ${certificaciones.length}`);
+  console.log(`   Precios de referencia: ${precios.length}`);
+  console.log(`   Obras activas: 1 (cliente@demo.com / cliente123)`);
+}
+
+main()
+  .then(async () => {
+    await prisma.$disconnect();
+  })
+  .catch(async (e) => {
+    console.error("❌ Error durante el seed:", e);
+    await prisma.$disconnect();
+    process.exit(1);
+  });

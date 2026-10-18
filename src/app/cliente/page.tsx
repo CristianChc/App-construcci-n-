@@ -1,0 +1,174 @@
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { prisma } from "@/lib/db";
+import Link from "next/link";
+
+export default async function ClienteDashboard() {
+  const session = await auth();
+  if (!session) redirect("/login?callbackUrl=/cliente");
+
+  const usuario = await prisma.usuario.findUnique({
+    where: { id: session!.user.id },
+    include: {
+      cliente: {
+        include: {
+          cotizaciones: { orderBy: { creadoEn: "desc" } },
+          obras: {
+            include: {
+              contrato: true,
+              hitos: { orderBy: { fecha: "asc" }, take: 5 },
+            },
+            orderBy: { fechaInicio: "desc" },
+          },
+        },
+      },
+    },
+  });
+
+  const cliente = usuario?.cliente;
+  const obras = cliente?.obras ?? [];
+  const obra = obras[0];
+  const cotizaciones = cliente?.cotizaciones ?? [];
+  const totalCotizaciones = cotizaciones.length;
+  const cotizacionesGanadas = cotizaciones.filter((c) => c.estado === "ganado").length;
+  const totalObras = obras.length;
+  const obraConHitos = obras.filter((o) => o.hitos.length > 0);
+  const maxProgreso = obraConHitos.reduce((max, o) => Math.max(max, o.progreso), 0);
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <p className="section-label mb-2 text-ink-faint">RESUMEN</p>
+        <h1 className="font-heading text-3xl font-bold">
+          Hola, {usuario?.nombre.split(" ")[0]}
+        </h1>
+        <p className="mt-2 text-sm text-ink-muted">
+          Este es el resumen de sus proyectos con nosotros.
+        </p>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="rounded border border-border bg-surface p-6">
+          <p className="section-label text-ink-faint">COTIZACIONES</p>
+          <p className="mt-3 font-heading text-4xl font-bold">{totalCotizaciones}</p>
+          <p className="mt-1 text-sm text-ink-muted">
+            {cotizacionesGanadas} ganadas
+          </p>
+        </div>
+
+        <div className="rounded border border-border bg-surface p-6">
+          <p className="section-label text-ink-faint">OBRA ACTIVA</p>
+          {obra ? (
+            <>
+              <p className="mt-3 font-heading text-xl font-bold">
+                {obra.direccionObra}
+              </p>
+              <div className="mt-3">
+                <div className="flex items-center justify-between text-xs text-ink-muted">
+                  <span>Progreso</span>
+                  <span>{obra.progreso}%</span>
+                </div>
+                <div className="mt-2 h-2 w-full rounded-full bg-ink/10">
+                  <div
+                    className="h-2 rounded-full bg-accent"
+                    style={{ width: `${obra.progreso}%` }}
+                  />
+                </div>
+              </div>
+              <p className="mt-1 text-sm text-ink-muted">
+                {obra.hitos.length} hitos registrados
+              </p>
+            </>
+          ) : (
+            <p className="mt-3 text-sm text-ink-muted">
+              Todavía no tiene una obra activa.
+            </p>
+          )}
+        </div>
+
+        <div className="rounded border border-border bg-surface p-6">
+          <p className="section-label text-ink-faint">CONTRATOS</p>
+          <p className="mt-3 font-heading text-4xl font-bold">
+            {obras.filter((o) => o.contrato).length}
+          </p>
+          <p className="mt-1 text-sm text-ink-muted">Contratos activos</p>
+        </div>
+
+        <div className="rounded border border-border bg-surface p-6">
+          <p className="section-label text-ink-faint">OBRAS TOTALES</p>
+          <p className="mt-3 font-heading text-4xl font-bold">{totalObras}</p>
+          <p className="mt-1 text-sm text-ink-muted">
+            En su historial
+          </p>
+        </div>
+      </div>
+
+      {/* Navegación rápida a secciones del portal */}
+      <div className="rounded border border-border bg-surface p-6">
+        <p className="section-label mb-4 text-ink-faint">MI OBRA</p>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Link
+            href="/cliente/avance"
+            className="rounded border border-border bg-background p-5 hover:border-accent transition-colors text-center"
+          >
+            <p className="section-label text-ink-faint">AVANCE</p>
+            <p className="mt-2 font-heading text-lg font-bold">Hitos de obra</p>
+            <p className="mt-1 text-sm text-ink-muted">
+              Ver progreso, hitos cumplidos y próximos pasos
+            </p>
+          </Link>
+          <Link
+            href="/cliente/pagos"
+            className="rounded border border-border bg-background p-5 hover:border-accent transition-colors text-center"
+          >
+            <p className="section-label text-ink-faint">PAGOS</p>
+            <p className="mt-2 font-heading text-lg font-bold">Historial</p>
+            <p className="mt-1 text-sm text-ink-muted">
+              Ver montos, fechas, conceptos y comprobantes
+            </p>
+          </Link>
+          <Link
+            href="/cliente/documentos"
+            className="rounded border border-border bg-background p-5 hover:border-accent transition-colors text-center"
+          >
+            <p className="section-label text-ink-faint">DOCUMENTOS</p>
+            <p className="mt-2 font-heading text-lg font-bold">Contratos y PDFs</p>
+            <p className="mt-1 text-sm text-ink-muted">
+              Descargar contrato firmado y documentación
+            </p>
+          </Link>
+        </div>
+      </div>
+
+      {obra && (
+        <div className="rounded border border-border bg-surface p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="section-label text-ink-faint">OBRA ACTIVA</p>
+              <p className="mt-2 font-heading text-2xl font-bold">{obra.direccionObra}</p>
+              <p className="mt-1 text-sm text-ink-muted">
+                Inicio:{" "}
+                {new Date(obra.fechaInicio).toLocaleDateString("es-AR")}
+                {obra.fechaFinEstimada
+                  ? ` - Fin estimado: ${new Date(obra.fechaFinEstimada).toLocaleDateString("es-AR")}`
+                  : ""}
+              </p>
+              <p className="mt-1 text-sm text-ink-muted">
+                Estado: {obra.estado.replace(/_/g, " ")}
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="section-label text-ink-faint">PROGRESO TOTAL</p>
+              <p className="mt-2 font-heading text-5xl font-bold text-accent-strong">
+                {maxProgreso}%
+              </p>
+              <p className="mt-1 text-sm text-ink-muted">
+                Max de sus obras
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
