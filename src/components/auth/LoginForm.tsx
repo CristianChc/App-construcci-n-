@@ -71,6 +71,17 @@ export function LoginForm({ callbackUrl }: { callbackUrl: string }) {
         {loading ? "Accediendo..." : "Acceder"}
       </button>
 
+      <p className="text-center text-sm text-ink-muted">
+        ¿No tiene cuenta? Complete una{" "}
+        <a href="/cotizacion" className="text-accent-strong hover:underline">
+          cotización
+        </a>
+        {" y le contactaremos. Si ya firmó un contrato, el administrador le"}
+        {" "}
+        <br />
+        creará su acceso.
+      </p>
+
     </form>
   );
 }

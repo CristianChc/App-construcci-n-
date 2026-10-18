@@ -90,7 +90,7 @@ export default async function ClienteDocumentosPage() {
 
             {!contrato.archivoPdfUrl && (
               <p className="mt-4 text-sm text-amber-600">
-                ⚠ PDF no subido aún. Contacte al administrador para obtener su contrato firmado.
+                ⚠ PDF no cargado todavía. Contacte al administrador para obtener su contrato firmado.
               </p>
             )}
 
@@ -119,9 +119,9 @@ export default async function ClienteDocumentosPage() {
           <p>• Actas de recepción (pendiente)</p>
           <p>• Garantías y seguros (pendiente)</p>
         </div>
-        <p className="mt-4 text-xs text-ink-faint">
-          Los documentos adicionales se irán agregando conforme avance la obra.
-        </p>
+<p className="mt-4 text-xs text-ink-faint">
+            Los documentos adicionales se agregarán conforme avance la obra.
+          </p>
       </div>
     </div>
   );

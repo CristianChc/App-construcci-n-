@@ -36,10 +36,10 @@ export default function CotizacionPage() {
         <div className="mx-auto max-w-md px-4">
           <p className="section-label mb-4 text-accent-strong">MUCHAS GRACIAS</p>
           <h1 className="font-heading text-3xl font-bold">
-            Tu solicitud fue enviada
+            Su solicitud fue enviada
           </h1>
           <p className="mt-4 text-ink-muted">
-            Nos comunicamos con usted en menos de 24 horas para coordinar una visita técnica.
+            Nos comunicaremos con usted en menos de 24 horas para coordinar una visita técnica.
           </p>
         </div>
       </div>
@@ -192,7 +192,7 @@ export default function CotizacionPage() {
 
           <div>
             <label htmlFor="descripcion" className="section-label block text-ink-faint">
-              Cuéntenos sobre su proyecto
+              Describa su proyecto
             </label>
             <textarea
               id="descripcion"
