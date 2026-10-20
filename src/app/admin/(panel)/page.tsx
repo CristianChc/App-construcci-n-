@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { ESTADO_LABELS, ESTADO_COLORES } from "@/lib/constants";
+import { ESTADOS_COTIZACION, ESTADO_LABELS, ESTADO_COLORES } from "@/lib/constants";
 import { getDashboardStats, getCotizacionesRecientes } from "./actions";
 
 export default async function AdminDashboard() {
@@ -9,8 +9,6 @@ export default async function AdminDashboard() {
 
   const stats = await getDashboardStats();
   const cotizaciones = await getCotizacionesRecientes();
-
-  const estadosOrdenados = ["nuevo", "contactado", "visita_tecnica", "presupuestado", "ganado", "perdido"] as const;
 
   return (
     <div>
@@ -21,7 +19,7 @@ export default async function AdminDashboard() {
       <div className="mt-8">
         <p className="section-label mb-4 text-ink-faint">EMBUDO DE COTIZACIONES</p>
         <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {estadosOrdenados.map((estado) => (
+          {ESTADOS_COTIZACION.map((estado) => (
             <div
               key={estado}
               className="rounded border border-border bg-surface p-4 text-center"

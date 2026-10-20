@@ -71,7 +71,7 @@
 | `ubicacion_obra` | `String?` | `@map("ubicacion_obra")` | Dirección/ciudad |
 | `plazo_inicio` | `PlazoInicio` | `@map("plazo_inicio")` | Enum |
 | `origen` | `String` | | `web`, `whatsapp`, `tiktok`, etc. |
-| `estado` | `String` | `@default("nuevo")` | Funnel: `nuevo`→`contactado`→`visita_tecnica`→`presupuestado`→`ganado`/`perdido` |
+| `estado` | `String` | `@default("nuevo")` | Funnel: `nuevo`→`contactado`→`contratado`→`no_concretado` |
 | `monto_estimado` | `Decimal?` | `@db.Decimal(12,2) @map("monto_estimado")` | Estimación inicial |
 | `monto_cerrado` | `Decimal?` | `@db.Decimal(12,2) @map("monto_cerrado")` | Valor final acordado |
 | `notas_internas` | `String?` | `@map("notas_internas")` | Solo admin |

@@ -23,9 +23,8 @@ Cada página pública tiene uno de dos propósitos: **convertir** o
 
 ```text
 visitante → cotización (con origen)
-   → embudo: nuevo → contactado → visita_tecnica → presupuestado
-                                     → ganado / perdido
-   → ganado: contrato
+   → embudo: nuevo → contactado → contratado → no_concretado
+   → contratado: contrato
    → obra activa (portal cliente + admin de obras)
    → proyecto publicado en portafolio (antes/durante/después)
    → testimonio publicado

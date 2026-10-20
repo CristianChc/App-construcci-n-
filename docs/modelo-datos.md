@@ -116,8 +116,7 @@ model Cotizacion {
   es solo para el admin; NO mezclarlos.
 
 **Estados del embudo** (VARCHAR + Zod en `src/lib/constants.ts`):
-`nuevo` → `contactado` → `visita_tecnica` → `presupuestado` →
-`ganado` / `perdido`
+`nuevo` → `contactado` → `contratado` → `no_concretado`
 
 **Orígenes** (VARCHAR + Zod en `src/lib/constants.ts`):
 `web`, `whatsapp`, `tiktok`, `facebook`, `referido`, `estimador`

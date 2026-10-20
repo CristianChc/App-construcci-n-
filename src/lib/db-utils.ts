@@ -53,10 +53,8 @@ export async function getCotizacionesPorEstado() {
   const porEstado: Record<string, typeof cotizaciones> = {
     nuevo: [],
     contactado: [],
-    visita_tecnica: [],
-    presupuestado: [],
-    ganado: [],
-    perdido: [],
+    contratado: [],
+    no_concretado: [],
   };
 
   for (const c of cotizaciones) {
